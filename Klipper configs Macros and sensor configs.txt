@@ -1,0 +1,200 @@
+
+[extruder]
+rotation_distance: 4.7830131121165    # a good start but you id recommend to test again using this site to calculate  https://www.service-uplink.de/esteps_cal/calculator.php 
+max_temp:290
+min_extrude_temp: 0
+pressure_advance: 0.022
+max_extrude_only_distance: 300.0
+max_extrude_cross_section: 10.0
+
+
+
+####Probe OFFSET                 #( make sure you calibrate your Z offset  before first print) 
+#z_offset: 2.5
+x_offset: 0
+y_offset: 28
+
+    
+####################################################################################
+##                     FILAMENT SENSOR CONFIG
+####################################################################################
+
+
+#  FILAMENT SENSOR
+[filament_switch_sensor material_0]
+switch_pin: ^EBBCan:PB3                       #Change according to your toolhead board pin
+pause_on_runout: true
+runout_gcode:
+    RESPOND PREFIX="FILAMENT" MSG="Runout detected! Printer paused. Please reload filament."
+
+  
+insert_gcode:
+    LOAD_FILAMENT
+    M117 Filament reloaded
+        RESPOND TYPE=echo MSG=" Filament Loading"
+  
+    
+[gcode_button UNL_FILA]
+pin: ^!EBBCan:PB4
+press_gcode:
+    {% if printer.idle_timeout.state != 'Printing' or printer.pause_resume.is_paused %}
+      M117 Unloading filament
+      RESPOND TYPE=echo MSG="Unloading filament"
+      UNLOAD_FILAMENT
+    {% else %}
+      M117 Cannot unload during print
+    RESPOND TYPE=echo MSG="Cannot unload during print"
+    {% endif %}
+    
+    
+    
+
+# ================================
+#  LOAD FILAMENT MACRO
+# ================================
+[gcode_macro LOAD_FILAMENT]
+gcode:
+    SET_LED LED="hotend_rgb" RED=0 GREEN=1 BLUE=0
+    M83                  ; relative extrusion
+    G92 E0               ; reset extruder
+    G1 E35 F350          ; load filament
+    G1 E-1.5 F1500       ; small retract
+    G92 E0               ; reset again
+    M83                  ; ensure relative mode
+    RESPOND TYPE=echo MSG="Filament Loaded"
+     SET_LED LED="hotend_rgb" RED=0.2314 GREEN=0.2235 BLUE=0.2118
+ 
+
+
+# ================================
+#  UNLOAD FILAMENT MACRO
+# ================================
+[gcode_macro UNLOAD_FILAMENT]
+gcode:
+    SET_LED LED="hotend_rgb" RED=1 GREEN=0 BLUE=0
+    M83                   # Relative mode
+    G92 E0.0              
+    G1 E-40 F450          # unload
+    G92 E0.0              
+    M82                   # Back to absolute
+    RESPOND TYPE=echo MSG="Unloading Filament"
+
+    
+####################################################################################
+##                     Macros  Filament Cut 
+####################################################################################
+  
+   [gcode_macro FILAMENT_CUT]                   #⚠️DON`T FORGET TO CHANGE XY coordinates for your cutter depressor arm position 
+gcode:
+    {% set fast_feed = 15000 %}
+    {% set slow_feed = 800 %}
+    {% set retract_feed = 3000 %}
+    {% set extrude_feed = 600 %}
+     
+    # Move near cutter
+    G90
+    G1 X225 F{fast_feed}    
+    G1 Y255 F{fast_feed}
+
+    ## Open the servo for cutting    # uncomment only If using a servo
+    #SERVO_OPEN
+    G4 P100
+
+    # Cutter press motions
+    G1 X247 F{slow_feed}
+    G1 X245 F{retract_feed}
+    G1 X247 F{slow_feed}
+    G1 X245 F{retract_feed}
+    G1 X247 F{slow_feed}
+    G1 E-2 F{extrude_feed}
+
+    # Retract away from cutter
+    G1 X230 F{retract_feed}
+
+      # # Close the servo   # uncomment only If using a servo
+      # SERVO_CLOSE
+    
+    # Load/unload filament
+    G1 E8 F{extrude_feed}
+    G1 E-14 F{extrude_feed}
+    G90  
+
+
+
+  #####################################################################
+#     ##                  Servo config ( ⚠️uncomment bellow if you are using a servo to open close the cutter arm)
+#     #####################################################################
+
+# [servo my_servo]
+# pin: PE9   #⚠️change to your pin name
+# maximum_servo_angle: 180
+# minimum_pulse_width: 0.0005
+# maximum_pulse_width: 0.0025
+
+# [gcode_macro SERVO_CLOSE]
+# description: Rotate the servo clockwise (left to right), then open it to 90 degrees
+# gcode:
+#   # Move servo to the right (counterclockwise direction)
+#   SET_SERVO SERVO=my_servo ANGLE=90   ; Move to 90 first, assuming left is the starting position
+#   G4 P500  ; Wait for the servo to settle
+#   # Now move to 90° to hold the "open" position (it will stay here)
+#   SET_SERVO SERVO=my_servo ANGLE=90   ; No power off here, it will hold
+#   G4 P500  ; Wait for the servo to settle
+#   SET_SERVO SERVO=my_servo WIDTH=0    ; Disable PWM (power off)
+
+# [gcode_macro SERVO_OPEN]
+# description: Rotate the servo counterclockwise (right to left), then close it to 0 degrees and cut power
+# gcode:
+#   # Move servo to the left (clockwise direction)
+#   SET_SERVO SERVO=my_servo ANGLE=90   ; Move to 90 first, assuming left is where it was
+#   G4 P500  ; Wait for the servo to settle
+#   # Now move to 0° to close it properly
+#   SET_SERVO SERVO=my_servo ANGLE=0    ; Move to 0 to close
+#     #####################################################################
+    
+    
+ #####################################################################
+#     ##                  Config for neopixel RGB  (uncoment if you using RGB neopixel 
+#     #####################################################################
+#
+
+# [neopixel hotend_rgb]
+# pin: EBBCan:PD3                    #change to your tolboard RGB pin name 
+# chain_count: 1
+# color_order: GRB
+# initial_RED: 0.0
+# initial_GREEN: 0.0
+# initial_BLUE: 0.0
+
+
+#[gcode_macro UPDATE_HOTEND_LED]
+# gcode:
+#     # Get the current temperature of the extruder
+#     {% set ext_temp = printer.extruder.temperature %}
+
+#     # Define RGB values based on the extruder's temperature
+#     {% if ext_temp >= 255 %}
+#         {% set r, g, b = 0.5, 0.0, 0.5 %}  # Purple for high temps
+#     {% elif ext_temp >= 235 %}
+#         {% set r, g, b = 1.0, 0.0, 0.0 %}  # Red
+#     {% elif ext_temp >= 200 %}
+#         {% set r, g, b = 1.0, 0.5, 0.0 %}  # Orange
+#     {% elif ext_temp >= 100 %}
+#         {% set r, g, b = 1.0, 1.0, 0.0 %}  # Yellow
+#     {% elif ext_temp >= 50 %}
+#         {% set r, g, b = 0.0, 1.0, 0.0 %}  # Green
+#     {% else %}
+#         {% set r, g, b = 0.0, 0.4, 0.6 %}  # Teal for cold temps
+#     {% endif %}
+
+#     # Apply the calculated color to the single hotend_rgb LED at index 1.
+#     # Klipper's LED indexing is 1-based, not 0-based, which caused the error.
+#     SET_LED LED=hotend_rgb INDEX=1 RED={r} GREEN={g} BLUE={b}
+
+    
+#[delayed_gcode LED_MONITOR]
+# initial_duration: 2
+# gcode:
+#     UPDATE_HOTEND_LED
+#     UPDATE_DELAYED_GCODE ID=LED_MONITOR DURATION=5
+
