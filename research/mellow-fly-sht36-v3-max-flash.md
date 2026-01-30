@@ -59,7 +59,25 @@ Successful serial/USB build produces: `out/klipper.uf2`
 
 ### Pre-installed State
 
-The board ships with **Katapult** (formerly CanBoot) pre-flashed, configured for CAN at **1M baud**. You do NOT need to flash Katapult yourself unless you wipe it.
+The board ships with **Katapult** (formerly CanBoot) pre-flashed, configured for CAN at **1M baud**. You do NOT need to reflash the Katapult bootloader itself unless you wipe it.
+
+However, **you should clone or update the Katapult repo** to get the latest `flashtool.py`. The SHT36 V3 shipped around late 2024, and the factory-bundled Katapult tools may be nearly a year behind. Since then, `flashtool.py` has received significant fixes for CAN flashing:
+
+- CAN bridge UUID detection fixes (broken discovery in older versions)
+- Increased timeout for flash block commands (prevents flash failures)
+- MCU mismatch prevention (won't let you flash wrong firmware)
+- USB-CAN bridge detection support
+- Improved bootloader wait method (more reliable flashing)
+- Graceful handling when bootloader doesn't report software version
+
+```bash
+# Clone (first time) or update the Katapult repo for latest flash tools
+git clone https://github.com/Arksine/katapult ~/katapult
+# Or if already cloned:
+cd ~/katapult && git pull
+```
+
+**Note:** The old `~/klipper/lib/canboot/flash_can.py` script is deprecated. Use `~/katapult/scripts/flashtool.py` instead.
 
 ### Method A: Flash Klipper via CAN (normal updates)
 
@@ -81,10 +99,7 @@ This is the standard method once the board is already running Katapult or Klippe
    sudo service klipper stop
    python3 ~/katapult/scripts/flashtool.py -i can0 -f ~/klipper/out/klipper.bin -u <YOUR_UUID>
    ```
-   Or with the older method:
-   ```bash
-   python3 ~/klipper/lib/canboot/flash_can.py -u <YOUR_UUID>
-   ```
+   **Avoid** the older `~/klipper/lib/canboot/flash_can.py` — it is deprecated and lacks the bug fixes in the current `flashtool.py`.
 
 4. Success shows: `CAN Flash Success`
 
@@ -319,7 +334,7 @@ sensor_mcu: SHT36
 
 ### Overview
 
-Katapult is a lightweight bootloader that enables firmware updates over CAN bus without physical access to the board. The SHT36 V3 **ships with Katapult pre-installed** at 1M CAN baud.
+Katapult is a lightweight bootloader that enables firmware updates over CAN bus without physical access to the board. The SHT36 V3 **ships with Katapult pre-installed** at 1M CAN baud. The bootloader itself rarely needs updating, but always use the latest `flashtool.py` from the repo (see Section 3 for details on why).
 
 ### If You Need to Re-flash Katapult
 
