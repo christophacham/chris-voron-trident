@@ -1,7 +1,9 @@
 # Flash Plan - Octopus V1.1 + SHT36 V3 Max
 
 ## Goal
-Flash both boards to test motors, bed heater, thermistors, and toolhead while waiting for Pi 5.
+Flash both boards with Kalico firmware to test motors, bed heater, thermistors, and toolhead while waiting for Pi 5.
+
+**Using Kalico** (Klipper fork) for non-planar printing support: https://github.com/KalicoCrew/kalico
 
 ## What's Baked into Firmware (reflash to change)
 - Communication mode
@@ -67,7 +69,7 @@ Flash both boards to test motors, bed heater, thermistors, and toolhead while wa
 
 ## Status
 - [ ] Get Linux environment ready
-- [ ] Clone Klipper repo
+- [ ] Clone Kalico repo (https://github.com/KalicoCrew/kalico)
 - [ ] Compile Octopus firmware (menuconfig + make)
 - [ ] Flash Octopus via SD card
 - [ ] Compile SHT36 firmware (menuconfig + make)
