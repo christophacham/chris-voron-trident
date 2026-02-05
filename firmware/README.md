@@ -34,6 +34,7 @@ Requires Docker. Run from this directory:
 3. Insert SD card into the Octopus
 4. Power cycle the board
 5. File will be renamed to `FIRMWARE.CUR` on success
+6. Verify with `lsusb | grep 1d50` - should show `1d50:606f` (not `614e`)
 
 #### Option 2: DFU Mode via Windows (STM32CubeProgrammer)
 
@@ -127,7 +128,10 @@ sudo service klipper start
 - Bootloader: 32KiB offset
 - Crystal: 12MHz
 - USB: PA11/PA12
+- USB Device ID: 0x1d50:0x606f (gs_usb compatible)
 - CAN: PD0/PD1 @ 1,000,000 baud
+
+**Note:** The USB Device ID must be `0x606f` for the Linux `gs_usb` driver to recognize it as a CAN adapter. Using `0x614e` (Klipper USB serial ID) will cause it to appear as `/dev/ttyACM0` instead of `can0`.
 
 ### SHT36 V3 Max (CAN Toolhead)
 - MCU: RP2040
