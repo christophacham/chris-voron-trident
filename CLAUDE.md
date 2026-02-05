@@ -1,13 +1,36 @@
-# Continue Setup on Linux
+# Voron Trident 250mm - Kalico/Klipper Setup
 
 ## Current Status
 - ✅ Octopus V1.1 flashed (USB-to-CAN bridge, 1M CAN speed)
 - ✅ Katapult bootloader built for SHT36 V3 Max
 - ✅ Klipper firmware built for SHT36 V3 Max
+- ✅ CAN interface configured and working (`can0` at 1M)
+- ✅ Kalico installed via KIAUH (klipper-2 service)
+- ✅ Moonraker + Mainsail installed
+- ✅ printer.cfg created and tested — X/Y/Z steppers verified
+- ✅ Z direction corrected (dir_pin inversion removed)
+- ✅ Z motors tested at 0.4A run_current
 - ⏳ **NEXT: Flash Katapult to SHT36 via USB boot**
 - ❌ Flash Klipper to SHT36 via CAN
-- ❌ CAN interface not configured
-- ❌ No printer.cfg yet
+- ❌ SHT36 not yet on CAN bus (extruder, fans, hotend commented out)
+- ❌ Bed heater not tested yet
+- ❌ Endstops/homing not verified
+- ❌ May migrate to Raspberry Pi 5 later
+
+## Host Setup (Pop!_OS Linux PC)
+- Kalico installed as `klipper-2` service (via KIAUH, symlinked `~/klipper -> ~/source/kalico`)
+- **Live config:** `~/printer_2_data/config/printer.cfg`
+- **Service:** `sudo systemctl restart klipper-2`
+- **Logs:** `~/printer_2_data/logs/klippy.log`
+- **Web UI:** Mainsail (via Moonraker)
+- CAN config: `/etc/network/interfaces.d/can0` (1M bitrate, txqueuelen 1024)
+- Octopus CAN UUID: `0f0788d658b4`
+
+## Tested Settings
+- X/Y steppers: 0.8A, 32 microsteps, physical endstops on PG6/PG9
+- Z steppers: 0.4A (reduced from 1.0A for testing), 32 microsteps, TR8x4 leadscrews
+- Z dir_pins: non-inverted (PG3, PC1, PF10) — verified correct direction
+- Electronics fans: disabled (set to PWM output_pin at value 0, pending quieter fans)
 
 ---
 
@@ -395,6 +418,7 @@ SET_HEATER_TEMPERATURE HEATER=heater_bed TARGET=40
 ---
 
 ## Reference Files in This Repo
+- `config/printer.cfg` - Live printer config (copy to `~/printer_2_data/config/printer.cfg`)
 - `FLASH-PLAN.md` - Firmware menuconfig settings
 - `SHT36-V3-MAX-PINOUT.md` - SHT36 pin reference
 - `VORON-TRIDENT-BUILD-GUIDE.md` - Full build documentation
