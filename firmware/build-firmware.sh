@@ -133,7 +133,8 @@ make -j\$(nproc)
 "
 
     cp "$KALICO_DIR/out/klipper.bin" "$OUTPUT_DIR/sht36-v3-max-can.bin"
-    echo -e "${GREEN}Built: sht36-v3-max-can.bin${NC}"
+    cp "$KALICO_DIR/out/klipper.uf2" "$OUTPUT_DIR/sht36-v3-max-can.uf2"
+    echo -e "${GREEN}Built: sht36-v3-max-can.bin and sht36-v3-max-can.uf2${NC}"
 }
 
 # Parse arguments

@@ -2,64 +2,42 @@
 
 ## Current Status
 - ✅ Octopus V1.1 flashed (USB-to-CAN bridge, 1M CAN speed)
-- ❌ SHT36 V3 Max needs flashing
+- ✅ Katapult bootloader built for SHT36 V3 Max
+- ✅ Klipper firmware built for SHT36 V3 Max
+- ⏳ **NEXT: Flash Katapult to SHT36 via USB boot**
+- ❌ Flash Klipper to SHT36 via CAN
 - ❌ CAN interface not configured
 - ❌ No printer.cfg yet
 
 ---
 
-## 1. Clone Kalico
+## 1. Flash Katapult Bootloader to SHT36 V3 Max
+
+Pre-built bootloader: `firmware/sht36-v3-max-katapult.uf2`
+
+### Flash via USB Boot
+1. Disconnect 24V from SHT36
+2. Hold BOOT button on SHT36
+3. Connect USB cable from SHT36 to Linux PC
+4. Release BOOT button
+5. Board mounts as `RPI-RP2`
+
+```bash
+cp firmware/sht36-v3-max-katapult.uf2 /media/$USER/RPI-RP2/
+# Board auto-reboots when done - RPI-RP2 disappears
+```
+
+6. Disconnect USB from SHT36
+
+---
+
+## 2. Clone Kalico (if not already done)
 
 ```bash
 cd ~
 git clone https://github.com/KalicoCrew/kalico
 cd kalico
 ```
-
----
-
-## 2. Compile & Flash SHT36 V3 Max
-
-### Compile
-```bash
-cd ~/kalico
-make clean
-make menuconfig
-```
-
-**Settings:**
-```
-[*] Enable extra low-level configuration options
-    Micro-controller Architecture: Raspberry Pi RP2040
-    Bootloader offset: 16KiB bootloader
-    Communication interface: CAN bus
-    CAN RX gpio: gpio1
-    CAN TX gpio: gpio0
-    CAN bus speed: 1000000
-```
-
-```bash
-make
-```
-
-### Flash via USB Boot
-1. Disconnect 24V from SHT36
-2. Hold BOOT button
-3. Connect USB to Linux PC
-4. Release BOOT button
-5. Mount appears as RPI-RP2
-
-```bash
-# Find the mount point
-lsblk
-# Or it may auto-mount to /media/username/RPI-RP2
-
-# Copy firmware
-cp out/klipper.uf2 /media/$USER/RPI-RP2/
-# Board auto-reboots when done
-```
-
-6. Disconnect USB from SHT36
 
 ---
 
@@ -94,10 +72,26 @@ Or reboot and it comes up automatically.
 
 ---
 
-## 4. Connect Hardware
+## 4. Connect Hardware & Flash Klipper to SHT36
 
+### Wire up CAN bus
 1. Connect Octopus to Linux PC via USB
-2. Power on 24V PSU (this powers Octopus + SHT36 via CAN cable)
+2. Connect CAN cable between Octopus and SHT36 (CANH, CANL, GND)
+3. Power on 24V PSU (powers both boards)
+
+### Find SHT36 in Katapult mode
+```bash
+python3 ~/katapult/scripts/flashtool.py -i can0 -q
+```
+
+You should see the SHT36 UUID with "Application: Katapult"
+
+### Flash Klipper firmware via CAN
+```bash
+python3 ~/katapult/scripts/flashtool.py -i can0 -u <SHT36_UUID> -f firmware/sht36-v3-max-can.bin
+```
+
+After flashing, the SHT36 will reboot into Klipper.
 
 ---
 
