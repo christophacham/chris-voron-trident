@@ -10,8 +10,8 @@
 - ✅ printer.cfg created and tested — X/Y/Z steppers verified
 - ✅ Z direction corrected (dir_pin inversion removed)
 - ✅ Z motors tested at 0.4A run_current
-- ⏳ **NEXT: Flash Katapult to SHT36 via USB boot**
-- ❌ Flash Klipper to SHT36 via CAN
+- ✅ Katapult bootloader flashed to SHT36 V3 Max (via USB boot / RPI-RP2)
+- ⏳ **NEXT: Flash Klipper to SHT36 via CAN**
 - ❌ SHT36 not yet on CAN bus (extruder, fans, hotend commented out)
 - ❌ Bed heater not tested yet
 - ❌ Endstops/homing not verified
