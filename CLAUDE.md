@@ -11,10 +11,15 @@
 - ✅ Z direction corrected (dir_pin inversion removed)
 - ✅ Z motors tested at 0.4A run_current
 - ✅ Katapult bootloader flashed to SHT36 V3 Max (via USB boot / RPI-RP2)
-- ⏳ **NEXT: Flash Klipper to SHT36 via CAN**
-- ❌ SHT36 not yet on CAN bus (extruder, fans, hotend commented out)
+- ✅ Katapult rebuilt for CAN mode (was USB mode — gpio RX=1, TX=0, 1M speed)
+- ✅ CAN-mode Katapult flashed to SHT36 via USB boot
+- ⚠️ **120Ω termination DIP switch broke off SHT36 — needs solder bridge on pads**
+- ⏳ **NEXT: Bridge 120Ω pads, then flash Klipper to SHT36 via CAN**
+- ❌ SHT36 not yet visible on CAN bus (needs 120Ω fix + CAN wiring + 24V)
+- ❌ SHT36 config commented out in printer.cfg (extruder, fans, hotend)
 - ❌ Bed heater not tested yet
 - ❌ Endstops/homing not verified
+- ❌ Part cooling fan missing (nozzle fan) — all other toolhead parts ready
 - ❌ May migrate to Raspberry Pi 5 later
 
 ## Host Setup (Pop!_OS Linux PC)
