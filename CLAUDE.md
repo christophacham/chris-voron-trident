@@ -1,26 +1,40 @@
 # Voron Trident 250mm - Kalico/Klipper Setup
 
 ## Current Status
-- ✅ Octopus V1.1 flashed (USB-to-CAN bridge, 1M CAN speed)
-- ✅ Katapult bootloader built for SHT36 V3 Max
-- ✅ Klipper firmware built for SHT36 V3 Max
-- ✅ CAN interface configured and working (`can0` at 1M)
 - ✅ Kalico installed via KIAUH (klipper-2 service)
 - ✅ Moonraker + Mainsail installed
 - ✅ printer.cfg created and tested — X/Y/Z steppers verified
 - ✅ Z direction corrected (dir_pin inversion removed)
 - ✅ Z motors tested at 0.4A run_current
-- ✅ Katapult bootloader flashed to SHT36 V3 Max (via USB boot / RPI-RP2)
-- ✅ Katapult rebuilt for CAN mode (was USB mode — gpio RX=1, TX=0, 1M speed)
-- ✅ CAN-mode Katapult flashed to SHT36 via USB boot
-- ⚠️ **120Ω termination DIP switch broke off SHT36 — needs solder bridge on pads**
-- ⏳ **NEXT: Bridge 120Ω pads, then flash Klipper to SHT36 via CAN**
-- ❌ SHT36 not yet visible on CAN bus (needs 120Ω fix + CAN wiring + 24V)
-- ❌ SHT36 config commented out in printer.cfg (extruder, fans, hotend)
-- ❌ Bed heater not tested yet
+- ✅ **Switched from CAN to USB for both MCUs** (CAN termination DIP switch broke)
+- ✅ Octopus V1.1 reflashed for USB serial (was USB-to-CAN bridge)
+- ✅ SHT36 V3 Max: Katapult (USB mode) + Klipper (USB mode) flashed
+- ✅ Both MCUs visible and communicating via USB serial
+- ✅ Bed heater config enabled (AC SSR on PA3/HE1, thermistor on PF3/TB)
+- ⚠️ **Bed thermistor reading 306°C (open circuit) — wiring issue, needs debugging**
+- ⚠️ 120Ω CAN termination DIP switch broke off SHT36 — solder bridge attempted
+- ❌ Extruder commented out (thermistor not connected to SHT36 yet)
+- ❌ Hotend fan commented out (depends on extruder config)
+- ❌ Part cooling fan not installed yet
 - ❌ Endstops/homing not verified
-- ❌ Part cooling fan missing (nozzle fan) — all other toolhead parts ready
 - ❌ May migrate to Raspberry Pi 5 later
+
+## Communication Setup (USB Serial — both MCUs)
+- **Octopus:** `/dev/serial/by-id/usb-Klipper_stm32f446xx_46001F001551303432323631-if00`
+- **SHT36:** `/dev/serial/by-id/usb-Klipper_rp2040_E6647C74038A6A37-if00`
+- CAN bus no longer used (can switch back later if 120Ω termination is fixed)
+
+## Firmware Files
+- `firmware/octopus-v1.1-usb.bin` — Octopus USB serial mode (STM32F446, 32KiB bootloader, 12MHz crystal)
+- `firmware/octopus-v1.1-can-bridge.bin` — Octopus CAN bridge mode (previous, kept for reference)
+- `firmware/sht36-v3-max-usb.bin` — SHT36 Klipper USB serial (RP2040, 16KiB Katapult bootloader)
+- `firmware/sht36-v3-max-can.bin` — SHT36 Klipper CAN mode (previous, kept for reference)
+- `firmware/sht36-v3-max-katapult.uf2` — Katapult bootloader (USB mode, flash via RPI-RP2)
+
+## Wiring Reference (Voron guide)
+- SSR wiring: https://docs.vorondesign.com/build/electrical/v1_octopus_wiring.html#ssr-wiring
+- Bed heater: AC 220V 500W Arlon silicone heater via SSR, Octopus HE1 (PA3) triggers SSR
+- Bed thermistor: NTC 100K (Generic 3950) on TB port (PF3)
 
 ## Host Setup (Pop!_OS Linux PC)
 - Kalico installed as `klipper-2` service (via KIAUH, symlinked `~/klipper -> ~/source/kalico`)
